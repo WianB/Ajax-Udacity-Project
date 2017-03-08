@@ -25,10 +25,10 @@ function loadData() {
 
 
     // load streetview
-    var $maps = '<img class="streetMap" src="https://maps.googleapis.com/maps/api/streetview?size=600x300&location=' + $address + '&key=AIzaSyDyjRB2_Z7x6jPCqd7NF1roXJmAHwbl5ms" alt="Street-view" >';
+    var $maps = '<img class="bgimg" src="https://maps.googleapis.com/maps/api/streetview?size=1200x600&location=' + $address + '&key=AIzaSyDyjRB2_Z7x6jPCqd7NF1roXJmAHwbl5ms" alt="Street-view" >';
 
     //Append map
-    $('.map-container').append($maps);
+    $body.append($maps);
     // YOUR CODE GOES HERE!
 
 
@@ -54,35 +54,55 @@ function loadData() {
 
 
     $.getJSON(url, function(data) {
-        //Main array variable of articles
-        var articles = data.response.docs;
-        for(var i = 0; i < articles.length; i++) {
-            console.log(i + ": "+ articles[i]);
+            //Main array variable of articles
+            var articles = data.response.docs;
+            for (var i = 0; i < articles.length; i++) {
+                console.log(i + ": " + articles[i]);
 
 
-            //Variable for printing
-            var tempAppend =
-                '<li class="article">'
-                + '<a href="'+articles[i].web_url +'">' +articles[i].headline.main+'</a>'
-                + '<p>' + articles[i].snippet +'</p>'
+                //Variable for printing
+                var tempAppend =
+                    '<li class="article">' +
+                    '<a href="' + articles[i].web_url + '">' + articles[i].headline.main + '</a>' +
+                    '<p>' + articles[i].snippet + '</p>'
 
-                +'</li>';
-            //Append the container with the new list item
-            $('.nytimes-container').children('#nytimes-articles').append(tempAppend);
-        }
+                    +
+                    '</li>';
+                //Append the container with the new list item
+                $('.nytimes-container').children('#nytimes-articles').append(tempAppend);
+            }
 
 
 
-    })
-    //Handle error
-    .error(function(e) {
+        })
+        //Handle error
+        .error(function(e) {
             $('#nytimes-header').text('New York times articles cannot be loaded');
-    });
+        });
 
 
     //Wikipedia API Handling
-    
+    // load wikipedia data
+    var wikiUrl = 'http://en.wikipedia.org/w/api.php?action=opensearch&search=' + $city + '&format=json&callback=wikiCallback';
+    var wikiRequestTimeout = setTimeout(function() {
+        $wikiElem.text("failed to get wikipedia resources");
+    }, 8000);
 
+    $.ajax({
+        url: wikiUrl,
+        dataType: "jsonp",
+        jsonp: "callback",
+        success: function(response) {
+            var articleList = response[1];
+            for (var i = 0; i < articleList.length; i++) {
+                var articleStr = articleList[i];
+                var url = 'http://en.wikipedia.org/wiki/' + articleStr;
+                $wikiElem.append('<li><a href="' + url + '">' + articleStr + '</a></li>');
+            };
+
+            clearTimeout(wikiRequestTimeout);
+        }
+    });
 
 
 
